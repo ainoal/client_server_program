@@ -9,10 +9,10 @@ def main():
         print(topic)
         print(text)
         dt = datetime.datetime.now()
+        date_time = dt.strftime("%d/%m/%Y - %H:%M:%S")
         print(dt)
-        proxy.new_entry(topic, text, dt)
-        #print("3 is even: %s" % str(proxy.is_even(3)))
-        #print("100 is even: %s" % str(proxy.is_even(100)))
+        print(date_time)
+        proxy.new_entry(topic, text, date_time)
     return None
 
 def get_input():

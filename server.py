@@ -5,6 +5,11 @@
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 import xml.etree.ElementTree as ET
+from datetime import datetime
+from datetime import timedelta
+
+import xml.dom.minidom
+import os
 
 def main():
     server = SimpleXMLRPCServer(("localhost", 8000))
@@ -33,14 +38,22 @@ def new_entry(topic, txt, timestamp):
     # TODO: make the XML style more beautiful.
     note = ET.SubElement(data, "topic", name=topic)
     ET.SubElement(note, "text").text = txt
-    ET.SubElement(note, "timestamp")   #.text = timestamp
-
-    #data.append(entry)
-    tree.write("db.xml")
+    ET.SubElement(note, "timestamp").text = timestamp
+    write_xml(data)
 
     # TODO: Return information about the XML file.
     temp_ret = 3
     return temp_ret
+
+# Reference:
+# https://stackoverflow.com/questions/749796/pretty-printing-xml-in-python/38573964#38573964
+def write_xml(root):
+    xml_string = xml.dom.minidom.parseString(ET.tostring(root)).toprettyxml()
+    xml_string = '\n'.join([s for s in xml_string.splitlines() if s.strip()])
+    f = open("db.xml", "w")
+    f.write(xml_string)
+    f.close()
+    return None
 
 # Test program, should be deleted later
 def is_even(n):

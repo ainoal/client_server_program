@@ -17,6 +17,9 @@ def main():
         notes = proxy.get_notes(topic)
         print("Here are all the entries of that topic:")
         print(notes)
+
+        q = input("Topic to query: ")
+        proxy.query(q)
     return None
 
 def get_input():

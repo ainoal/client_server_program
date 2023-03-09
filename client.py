@@ -13,6 +13,10 @@ def main():
         print(dt)
         print(date_time)
         proxy.new_entry(topic, text, date_time)
+
+        notes = proxy.get_notes(topic)
+        print("Here are all the entries of that topic:")
+        print(notes)
     return None
 
 def get_input():

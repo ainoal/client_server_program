@@ -2,6 +2,10 @@
 # leave the server running, listening to the right port.
 # After that, you can run client program(s) that make requests to the server.
 
+# TODO: Add a function that checks if db.xml exists and is readable.
+# Optional: add some kind of a backup.
+# TODO: Add multiple clients.
+
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 import xml.etree.ElementTree as ET
@@ -14,9 +18,9 @@ import os
 def main():
     server = SimpleXMLRPCServer(("localhost", 8000))
     print("Listening on port 8000")
-    server.register_function(is_even, "is_even")
     server.register_function(new_entry, "new_entry")
     server.register_function(search_topic, "search_topic")
+    server.register_function(get_notes, "get_notes")
 
     # TODO: try-catch for KeyboardInterrupt
     server.serve_forever()
@@ -49,6 +53,16 @@ def new_entry(topic, txt, timestamp):
     temp_ret = 3
     return temp_ret
 
+def get_notes(topic):
+    tree = ET.parse("db.xml")
+    root = tree.getroot()
+
+    topic_found = search_topic(root, topic)
+    str = ""
+    for note in topic_found:
+        str = str + note.find("text").text + "\n"
+    return str
+
 # Reference:
 # https://stackoverflow.com/questions/749796/pretty-printing-xml-in-python/38573964#38573964
 def write_xml(root):
@@ -58,12 +72,5 @@ def write_xml(root):
     f.write(xml_string)
     f.close()
     return None
-
-# Test program, should be deleted later
-def is_even(n):
-    if (n % 2 == 0):
-        return True
-    else:
-        return False
 
 main()

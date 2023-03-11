@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <data>
-	<topic name="Animal Things">
-		<note name="Dogs are better than cats 03">
-			<text>
-            Dogs respond when you call their name (unlike cats, who just ignore you)
-            </text>
-			<timestamp>
-            03/16/21 - 14:03:04
-            </timestamp>
+	<topic name="cats">
+		<note name="Note 1">
+			<text>are fun</text>
+			<timestamp>11/03/2023 - 18:29:36</timestamp>
+		</note>
+		<note name="Note x">
+			<text>https://en.wikipedia.org/wiki/Cat ;  https://en.wikipedia.org/wiki/Cats_(musical) ;  https://en.wikipedia.org/wiki/Cats_(2019_film) ;  https://en.wikipedia.org/wiki/Cats_and_the_Internet ;  https://en.wikipedia.org/wiki/Catskill_Mountains ;  </text>
+			<timestamp>11/03/2023 - 18:29:47</timestamp>
 		</note>
 	</topic>
 </data>

@@ -2,13 +2,11 @@
 # leave the server running, listening to the right port.
 # After that, you can run client program(s) that make requests to the server.
 
-# TODO: Add a function that checks if db.xml exists and is readable.
-# Optional: add some kind of a backup.
+# TODO: Optional: add some kind of a backup for db.xml.
 # TODO: Add multiple clients.
 # (TODO: way to name notes.)
-# (TODO: what to return from each function?)
 # TODO: What to return from each function?
-# TODO: error handling for if 
+# TODO: error handling for if client crashes
 
 from xmlrpc.server import SimpleXMLRPCServer
 import xml.etree.ElementTree as ET
@@ -32,8 +30,10 @@ def main():
     server.register_function(request, "request")
     server.register_function(free_critical_section, "free_critical_section")
 
-    # TODO: try-catch for KeyboardInterrupt
-    server.serve_forever()
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("KeyboardInterrupt. Shut down server.")
     return None
 
 # TODO: Consider different return data types for get_notes (e.g. a list)
@@ -44,7 +44,12 @@ def main():
 def get_notes(topic, timestamp, pid):
     req = request(pid, timestamp)
 
-    tree = ET.parse("db.xml")
+    # Make sure the xml file exists before trying read it.
+    try:
+        tree = ET.parse("db.xml")
+    except FileNotFoundError:
+        create_file("db.xml")
+        tree = ET.parse("db.xml")
     root = tree.getroot()
 
     topic_found = search_topic(root, topic)
@@ -57,7 +62,13 @@ def get_notes(topic, timestamp, pid):
 # This function creates a new entry in the database.
 def new_entry(topic, txt, timestamp, pid):
     req = request(pid, timestamp)
-    tree = ET.parse("db.xml")
+
+    # Make sure the xml file exists before trying write to it.
+    try:
+        tree = ET.parse("db.xml")
+    except FileNotFoundError:
+        create_file("db.xml")
+        tree = ET.parse("db.xml")
     data = tree.getroot()
 
     # Search for the topic in the xml file.
@@ -94,7 +105,6 @@ def query(topic, pid):
     str = ""
     for i in range (0, len(data[3])):
         str = str + data[3][i] + " ;  "
-    print(str)
 
     dt = datetime.datetime.now()
     date_time = dt.strftime("%d/%m/%Y - %H:%M:%S")
@@ -114,6 +124,13 @@ def write_xml(root):
     f = open("db.xml", "w")
     f.write(xml_string)
     f.close()
+    return None
+
+# Create a simple xml file that can be used to build the database.
+def create_file(filename):
+    root = ET.Element("data")
+    tree = ET.ElementTree(root)
+    tree.write("db.xml", encoding = "UTF-8", xml_declaration = True)
     return None
 
 class Request:
@@ -140,7 +157,10 @@ def request(pid, timestamp):
 
 # Remove request from the list when done.
 def free_critical_section(req):
-    request_list.remove(req)
+    try:
+        request_list.remove(req)
+    except ValueError:
+        print("Could not remove request because it doesn't exist in the current request list.")
     return request_list
    
 def add_client(pid):
@@ -149,8 +169,10 @@ def add_client(pid):
     return client_list
 
 def remove_client(pid):
-    client_list.remove(pid)
-    print(client_list)
+    try:
+        client_list.remove(pid)
+    except ValueError:
+        print("Could not remove client from the list because it does not exist in the current list.")
     return client_list
 
 main()

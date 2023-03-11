@@ -1,7 +1,6 @@
 import xmlrpc.client
 import datetime
 import os
-import sys
 
 def main():
     with xmlrpc.client.ServerProxy("http://localhost:8000/") as proxy:

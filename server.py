@@ -2,8 +2,9 @@
 # leave the server running, listening to the right port.
 # After that, you can run client program(s) that make requests to the server.
 
-# TODO: Optional: add some kind of a backup for db.xml.
-# TODO: Add multiple clients.
+# https://docs.python.org/3/library/xmlrpc.server.html#module-xmlrpc.server
+# https://docs.python.org/3/library/xml.etree.elementtree.html
+
 # (TODO: way to name notes.)
 # TODO: What to return from each function?
 # TODO: error handling for if client crashes
@@ -18,6 +19,7 @@ import datetime
 client_list = []
 request_list = []
 
+# Run server and register functions.
 def main():
     server = SimpleXMLRPCServer(("localhost", 8000))
     print("Listening on port 8000")
@@ -35,8 +37,6 @@ def main():
     except KeyboardInterrupt:
         print("KeyboardInterrupt. Shut down server.")
     return None
-
-# TODO: Consider different return data types for get_notes (e.g. a list)
 
 # This function is used for fetching all the notes of a certain topic.
 # When a client calls get_notes, it gets back the timestamp and text of
@@ -79,7 +79,11 @@ def new_entry(topic, txt, timestamp, pid):
         tpc = ET.SubElement(data, "topic", name=topic)
         note = ET.SubElement(tpc, "note", name="Note 1")
     else:
-        note = ET.SubElement(topic_found, "note", name="Note x")
+        x = 1
+        for n in topic_found.findall("note"):
+            x = x + 1
+        note_name = "Note " + str(x)
+        note = ET.SubElement(topic_found, "note", name=note_name)
     ET.SubElement(note, "text").text = txt
     ET.SubElement(note, "timestamp").text = timestamp
     write_xml(data)
@@ -87,6 +91,8 @@ def new_entry(topic, txt, timestamp, pid):
     free_critical_section(req)
     return topic
 
+# Query Wikipedia for a topic given as an input parameter.
+# Return up to 5 links to Wikipedia pages that match the query.
 def query(topic, pid):
     session = requests.Session()
     URL = "https://en.wikipedia.org/w/api.php"
@@ -111,11 +117,13 @@ def query(topic, pid):
     new_entry(topic, str, date_time, pid)
     return str
 
+# Search a certain topic in an element tree.
 def search_topic(root, topic):
     str_find = ".//topic[@name='" + topic + "']"
     elem = root.find(str_find)
     return elem
 
+# Write the contents of an element tree to an xml file.
 # Reference:
 # https://stackoverflow.com/questions/749796/pretty-printing-xml-in-python/38573964#38573964
 def write_xml(root):
@@ -133,6 +141,7 @@ def create_file(filename):
     tree.write("db.xml", encoding = "UTF-8", xml_declaration = True)
     return None
 
+# Client's request to access a critical section in the program.
 class Request:
     def __init__(self, pid, timestamp):
         self.pid = pid
@@ -162,12 +171,14 @@ def free_critical_section(req):
     except ValueError:
         print("Could not remove request because it doesn't exist in the current request list.")
     return request_list
-   
+
+# The server keeps track of its clients. Add a new client to the client list.
 def add_client(pid):
     client_list.append(pid)
     print(client_list)
     return client_list
 
+# Remove client from the client list.
 def remove_client(pid):
     try:
         client_list.remove(pid)

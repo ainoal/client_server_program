@@ -5,10 +5,6 @@
 # https://docs.python.org/3/library/xmlrpc.server.html#module-xmlrpc.server
 # https://docs.python.org/3/library/xml.etree.elementtree.html
 
-# (TODO: way to name notes.)
-# TODO: What to return from each function?
-# TODO: error handling for if client crashes
-
 from xmlrpc.server import SimpleXMLRPCServer
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -54,10 +50,10 @@ def get_notes(topic, timestamp, pid):
 
     topic_found = search_topic(root, topic)
     free_critical_section(req)
-    str = ""
+    string = ""
     for note in topic_found:
-        str = str +note.find("timestamp").text +  ": " + note.find("text").text + "\n"
-    return str
+        string = string +note.find("timestamp").text +  ": " + note.find("text").text + "\n"
+    return string
 
 # This function creates a new entry in the database.
 def new_entry(topic, txt, timestamp, pid):
@@ -108,14 +104,15 @@ def query(topic, pid):
     R = session.get(url=URL, params=my_params)
     data = R.json()
 
-    str = ""
-    for i in range (0, len(data[3])):
-        str = str + data[3][i] + " ;  "
+    string = ""
+    for i in range (0, len(data[3])-1):
+        string = string + data[3][i] + " ;  "
+    string = string + data[3][i]
 
     dt = datetime.datetime.now()
     date_time = dt.strftime("%d/%m/%Y - %H:%M:%S")
-    new_entry(topic, str, date_time, pid)
-    return str
+    new_entry(topic, string, date_time, pid)
+    return string
 
 # Search a certain topic in an element tree.
 def search_topic(root, topic):

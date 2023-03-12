@@ -1,9 +1,15 @@
+######################################################################
+# Client program for Distributed Systems course
+# Assignment 2
+# server.py
+# Author: ainoal
+# https://docs.python.org/3/library/xmlrpc.server.html#module-xmlrpc.server
+# https://docs.python.org/3/library/xml.etree.elementtree.html
+######################################################################
 # To execute a client-server program: first run the server application and
 # leave the server running, listening to the right port.
 # After that, you can run client program(s) that make requests to the server.
-
-# https://docs.python.org/3/library/xmlrpc.server.html#module-xmlrpc.server
-# https://docs.python.org/3/library/xml.etree.elementtree.html
+######################################################################
 
 from xmlrpc.server import SimpleXMLRPCServer
 import xml.etree.ElementTree as ET
@@ -51,8 +57,11 @@ def get_notes(topic, timestamp, pid):
     topic_found = search_topic(root, topic)
     free_critical_section(req)
     string = ""
-    for note in topic_found:
-        string = string +note.find("timestamp").text +  ": " + note.find("text").text + "\n"
+    try:
+        for note in topic_found:
+            string = string +note.find("timestamp").text +  ": " + note.find("text").text + "\n"
+    except TypeError:
+        string = "NNF"
     return string
 
 # This function creates a new entry in the database.
@@ -97,7 +106,7 @@ def query(topic, pid):
         "action": "opensearch",
         "namespace": "0",
         "search": topic,
-        "limit": "5",
+        "limit": "6",
         "format": "json"
     }
 
@@ -105,13 +114,15 @@ def query(topic, pid):
     data = R.json()
 
     string = ""
-    for i in range (0, len(data[3])-1):
-        string = string + data[3][i] + " ;  "
-    string = string + data[3][i]
-
-    dt = datetime.datetime.now()
-    date_time = dt.strftime("%d/%m/%Y - %H:%M:%S")
-    new_entry(topic, string, date_time, pid)
+    try:
+        for i in range (0, len(data[3])-2):
+            string = string + data[3][i] + " ;  "
+        string = string + data[3][len(data[3])-1]
+        dt = datetime.datetime.now()
+        date_time = dt.strftime("%d/%m/%Y - %H:%M:%S")
+        new_entry(topic, string, date_time, pid)
+    except IndexError:
+        string = "NAF"
     return string
 
 # Search a certain topic in an element tree.
@@ -145,7 +156,8 @@ class Request:
         self.timestamp = timestamp
 
 # Request access to a critical section. In this program, critical sections
-# are ones where the xml is read and written.
+# are ones where the xml is read and written. This function takes care of
+# mutual exclusion.
 def request(pid, timestamp):
     req = Request(pid, timestamp)
     request_list.append(req)
@@ -184,3 +196,6 @@ def remove_client(pid):
     return client_list
 
 main()
+
+######################################################################
+# eof

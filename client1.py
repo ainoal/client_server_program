@@ -64,6 +64,7 @@ def make_new_note(proxy, pid):
     dt = datetime.datetime.now()
     date_time = dt.strftime("%d/%m/%Y - %H:%M:%S")
     proxy.new_entry(topic, text, date_time, pid)
+    print("Note created.\n")
     return None
 
 # Ask user for a topic and search for contents of that topic in the notebook.
@@ -71,10 +72,10 @@ def get_contents(proxy, pid):
     topic = input("Which topic do you want to search: ")
     notes = proxy.get_notes(topic, datetime.datetime.now(), pid)
     if (notes == "NNF"):
-        print("No notes found for that topic.")
+        print("No notes found for that topic.\n")
     else:
         print("Here are all the entries of that topic:")
-        print(notes)
+        print(notes, "\n")
     return None
 
 # Ask user for a topic to query Wikipedia. If results are found, add them
@@ -83,10 +84,10 @@ def query(proxy, pid):
     q = input("Topic to query: ")
     query_results = proxy.query(q, pid)
     if (query_results == "NAF"):
-        print("No Wikipedia articles found for your query.")
+        print("No Wikipedia articles found for your query.\n")
     else:
         print("These Wikipedia articles were found and added to your notes:",
-            query_results)
+            query_results, "\n")
     return None
 
 main()
